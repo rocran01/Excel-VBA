@@ -1,0 +1,144 @@
+Option Explicit
+
+Sub sales_Inv()
+    Sheets("Sales Invoice").Activate
+    ActiveSheet.Range("A1").Select
+End Sub
+
+
+Sub pur_Inv()
+    Sheets("Purchase Invoice").Activate
+    ActiveSheet.Range("A1").Select
+End Sub
+
+
+Sub cus_details()
+    Sheets("Customer details").Activate
+    ActiveSheet.Range("A1").Select
+End Sub
+
+
+Sub sup_details()
+    Sheets("Supplier details").Activate
+    ActiveSheet.Range("A1").Select
+End Sub
+
+
+Sub vat_f()
+    Dim InvNo As Range
+    Set InvNo = Range("inv")
+    Dim vatInc As Range
+    Set vatInc = Range("vatIn")
+    Dim vatExc As Range
+    Set vatExc = Range("vatEx")
+    Dim vat As Range
+    Set vat = Range("vat")
+On Error GoTo errHandler
+    Sheets("Sales Invoice").Activate
+    'calculate VAT
+    If (vatInc.Value <= 0 And vatExc.Value <= 0) Then
+        MsgBox "VAT Inclusive or VAT exclusive needs to be fill"
+    ElseIf (vatInc.Value <= 0 And vatExc.Value > 0) Then
+        vat.Value = vatExc.Value * 0.2
+        vatInc.Value = (vatExc.Value * 0.2) + vatExc.Value
+        
+    ElseIf (vatInc.Value > 0 And vatExc.Value > 0 And vat.Value > 0) Then
+        MsgBox "One field need to be empty"
+        
+    Else
+        vatExc.Value = (vatInc.Value / 1.2)
+        vat.Value = vatInc.Value - vatExc.Value
+    End If
+    vat.Select
+    'calculation done, invoice number created
+exitHandler:
+    Exit Sub
+errHandler:
+    MsgBox "Contact Adminstrator Robert Ocran"
+    Resume exitHandler
+End Sub
+
+
+ 
+Public Function invv()
+    Dim k As New InvNo
+    msg (InvNo.createInv)
+End Function
+Sub createpdf()
+
+Dim inv As Range
+Dim template As Range
+Dim wsA As Worksheet
+Dim wbA As Workbook
+Dim strTime As String
+Dim strName As String
+Dim strPath As String
+Dim strFile As String
+Dim strPathFile As String
+Dim myFile As Variant
+On Error GoTo errHandler
+Set template = Range("a1")
+Set inv = Sheets("Sales Invoice").Range("b8")
+Set wbA = ActiveWorkbook
+Set wsA = ActiveSheet
+
+Sheets("Invoice Template").Activate
+template = Range("a1:j58").Select
+strTime = Format(Now(), "yyyymmdd\_hhmm")
+
+'get active workbook folder, if saved
+strPath = wbA.Path
+If strPath = "" Then
+  strPath = Application.DefaultFilePath
+End If
+strPath = strPath & "\"
+
+'replace spaces and periods in sheet name
+strName = Replace(wsA.Name, " ", "")
+strName = Replace(strName, ".", "_")
+
+'create default name for savng file
+strFile = "Commission_Inv_" & inv & "_" & "_" & strTime & ".pdf"
+strPathFile = strPath & strFile
+
+'use can enter name and
+' select folder for file
+myFile = Application.GetSaveAsFilename _
+    (InitialFileName:=strPathFile, _
+        FileFilter:="PDF Files (*.pdf), *.pdf", _
+        Title:="Select Folder and FileName to save")
+
+'export to PDF if a folder was selected
+If myFile <> "False" Then
+    wsA.ExportAsFixedFormat _
+        Type:=xlTypePDF, _
+        Filename:=myFile, _
+        Quality:=xlQualityStandard, _
+        IncludeDocProperties:=True, _
+        IgnorePrintAreas:=False, _
+        OpenAfterPublish:=False
+    'confirmation message with file info
+    MsgBox "PDF file has been created: " _
+      & vbCrLf _
+      & myFile
+End If
+'back to original location.
+exitHandler:
+    Exit Sub
+errHandler:
+    MsgBox "Could not create PDF file"
+    Resume exitHandler
+
+End Sub
+
+Sub sageImport()
+    Dim i As Integer
+    i = 0
+    Dim import As Worksheet
+    Dim impRange As Range
+    Set import = Sheets("Import")
+    Sheets("Import").Activate
+    Set impRange = Range("a1").End(xlDown).Offset(i, 1)
+    impRange.Activate
+    
+End Sub
